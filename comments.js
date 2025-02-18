@@ -1,37 +1,44 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+//Create a web server
+const http = require('http');
 const fs = require('fs');
+const path = require('path');
+const comments = require('./comments.json');
 
-const app = express();
-app.use(bodyParser.urlencoded({ extended: true }));
-
-const comments = [];
-const commentsFile = 'comments.json';
-
-fs.readFile(commentsFile, 'utf8', (err, data) => {
-  if (err) {
-    console.log(`Error reading file from disk: ${err}`);
-  } else {
-    comments = JSON.parse(data);
-  }
-});
-
-app.post('/add_comment', (req, res) => {
-  const comment = req.body.comment;
-  comments.push(comment);
-  fs.writeFile(commentsFile, JSON.stringify(comments), (err) => {
-    if (err) {
-      console.log(`Error writing file: ${err}`);
+const server = http.createServer((req, res) => {
+    if (req.method === 'GET' && req.url === '/comments') {
+        res.writeHead(200, {
+            'Content-Type': 'application/json'
+        });
+        res.end(JSON.stringify(comments));
+    } else if (req.method === 'POST' && req.url === '/comments') {
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk;
+        });
+        req.on('end', () => {
+            let newComment = JSON.parse(body);
+            comments.push(newComment);
+            fs.writeFile(path.join(__dirname, 'comments.json'), JSON.stringify(comments), (err) => {
+                if (err) {
+                    res.writeHead(500, {
+                        'Content-Type': 'text/plain'
+                    });
+                    res.end('Server error');
+                }
+                res.writeHead(201, {
+                    'Content-Type': 'application/json'
+                });
+                res.end(JSON.stringify(newComment));
+            });
+        });
     } else {
-      res.send('Comment added!');
+        res.writeHead(404, {
+            'Content-Type': 'text/plain'
+        });
+        res.end('Not found');
     }
-  });
 });
 
-app.get('/comments', (req, res) => {
-  res.send(comments);
-});
-
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+server.listen(3000, () => {
+    console.log('Server is listening on port 3000');
 });
