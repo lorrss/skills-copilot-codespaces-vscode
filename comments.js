@@ -1,10 +1,3 @@
-// Create a web server 
-// 1. Create a web server
-// 2. Create a comments array
-// 3. Create a form to submit comments
-// 4. Create a route to handle POST requests to add comments
-// 5. Create a route to handle GET requests to return all comments
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
@@ -42,17 +35,3 @@ app.get('/comments', (req, res) => {
 app.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
-
-// Run the file with node and test the server with curl or Postman
-
-// curl -d "comment=Hello from curl" -X POST http://localhost:3000/add_comment
-// curl http://localhost:3000/comments
-
-// Postman
-// POST http://localhost:3000/add_comment
-// Body: form-data
-// key: comment
-// value: Hello from Postman
-// Send
-// GET http://localhost:3000/comments
-// Send
